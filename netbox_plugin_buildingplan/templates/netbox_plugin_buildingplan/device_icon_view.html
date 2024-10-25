@@ -1,0 +1,91 @@
+{% extends 'base/layout.html' %}
+
+{% block title %}
+    Device Icons
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<script src="https://kit.fontawesome.com/ad3dc1969c.js" crossorigin="anonymous"></script>
+
+<div class="container">
+    <h2>Assign Device Role</h2>
+    <div class="row">
+        {% for icon in icons %}
+        <div class="col-md-2 text-center mt-5">
+            <img src="{% static 'icons/' %}{{ icon.icon_path }}" class="device-icon" />
+            <p>{{ icon.icon_path }}</p>
+
+            {% if icon.role %}
+                <p><strong>{{ icon.role.name }}</strong></p>
+            {% else %}
+                <p><strong>Not Assigned</strong></p>
+            {% endif %}
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal"
+                    data-icon-path="{{ icon.icon_path }}"
+                    data-role-id="{% if icon.role %}{{ icon.role.id }}{% else %}''{% endif %}">
+                <i class="fas fa-edit"></i>
+            </button>
+
+            <form method="POST" action="{% url 'plugins:netbox_plugin_buildingplan:assign_role' %}" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="icon_path" value="{{ icon.icon_path }}" />
+                <input type="hidden" name="role" value="" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'plugins:netbox_plugin_buildingplan:assign_role' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Редактировать роль устройства</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="icon_path" id="modalIconPath" value="">
+                    <div class="form-group">
+                        <label for="modalRole">Выберите роль</label>
+                        <select name="role" id="modalRole" class="form-control">
+                            {% for role in available_roles %}
+                                <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var editModal = document.getElementById('editModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Button that triggered the modal
+            var iconPath = button.getAttribute('data-icon-path'); // Extract info from data-* attributes
+            var roleId = button.getAttribute('data-role-id');
+
+            var modalIconPath = editModal.querySelector('#modalIconPath');
+            modalIconPath.value = iconPath;
+
+            var modalRoleSelect = editModal.querySelector('#modalRole');
+            modalRoleSelect.value = roleId; // Set the current role in the dropdown
+        });
+    });
+</script>
+{% endblock content %}

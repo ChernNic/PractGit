@@ -1,0 +1,47 @@
+{% extends 'generic/object_list.html' %}
+{% load render_table from django_tables2 %}
+
+{% block title %}
+    Building Plans
+{% endblock title %}
+
+{% block buttons %}
+    <div class="btn-list">
+        <a href="{% url 'plugins:netbox_plugin_buildingplan:buildingplan_add' %}" class="btn btn-primary">
+            <i class="mdi mdi-plus-thick"></i> Add New Building Plan
+        </a>
+    </div>
+{% endblock buttons %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        {% render_table table %}
+    </div>
+    <div class="col-md-3 noprint">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Filter</strong>
+            </div>
+            <div class="panel-body">
+                <form action="." method="get" class="form">
+                    {% for field in filter_form.visible_fields %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    <div class="mt-2 text-right noprint">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="mdi mdi-filter" aria-hidden="true"></span> Apply
+                        </button>
+                        <a href="." class="btn btn-default">
+                            <span class="mdi mdi-close" aria-hidden="true"></span> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
